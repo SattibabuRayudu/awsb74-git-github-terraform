@@ -53,3 +53,5 @@ terraform destroy --auto-approve
 2. Mutitpl tfvars files
 3. Lifecycle meta Arguments
 4. Functions basics
+
+
