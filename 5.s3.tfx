@@ -12,18 +12,18 @@ resource "aws_s3_bucket" "bhavanibuckets" {
 
 resource "aws_s3_bucket_policy" "demo_allow_all" {
   count = 3
-  bucket = "awsb74buckets00${count.index + 1}"
-  depends_on = [aws_s3_bucket_public_access_block.demo]
+  bucket = "bhavanibuckets00${count.index + 1}"
+  #depends_on = [aws_s3_bucket_public_access_block.demo]
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
         Principal = "*"
-        Action   = "s3:GetObject"
+        Action   = "s3:*"
         Resource = [
-          element(aws_s3_bucket.awsb74buckets[*].arn,count.index),
-          "${element(aws_s3_bucket.awsb74buckets[*].arn,count.index)}/*"
+          element(aws_s3_bucket.bhavanibuckets[*].arn,count.index),
+          "${element(aws_s3_bucket.bhavanibuckets[*].arn,count.index)}/*"
         ]
       }
     ]
