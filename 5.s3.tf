@@ -20,7 +20,7 @@ resource "aws_s3_bucket_policy" "demo_allow_all" {
       {
         Effect = "Allow"
         Principal = "*"
-        Action   = "s3:*"
+        Action   = "s3:GetObject"
         Resource = [
           element(aws_s3_bucket.bhavanibuckets[*].arn,count.index),
           "${element(aws_s3_bucket.bhavanibuckets[*].arn,count.index)}/*"
