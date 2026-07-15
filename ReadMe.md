@@ -50,8 +50,22 @@ terraform destroy --auto-approve
 
 ## Class-2
 1. Variables and tfvars
-2. Mutitpl tfvars files
-3. Lifecycle meta Arguments
-4. Functions basics
+2. Terraform Functions
+   - contains(list, value)
+   - count()
+   - element(list,index)
+   - length
+3. Multiple tfvar files
+4. Data Sources
 
-
+## Class-3
+1. Lifecycle meta Arguments
+   - depends_on
+   - prevent_destroy
+   - create_before_destroy
+   - ignore_changes
+2. Importing Resoruces In To Terraform State
+3. Renaming Resource in Terraform State.
+4. Deleting resources from Terraform State.
+5. Dynamic Blocks With Foreach.
+5. Functions Continued.
