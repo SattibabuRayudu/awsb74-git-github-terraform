@@ -1,5 +1,5 @@
 data "aws_route53_zone" "awsb74_xyz" {
-  name         = "awsb74.xyz"
+  name         = "rayudu.xyz"
 }
 
 resource "aws_route53_record" "www" {
