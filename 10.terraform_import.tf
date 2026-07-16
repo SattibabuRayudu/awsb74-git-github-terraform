@@ -1,10 +1,21 @@
-resource "aws_s3_bucket" "bhavani63data" {}
-resource "aws_s3_bucket" "bhavani63logs" {}
+resource "aws_s3_bucket" "bhavani63data" {
+  bucket        = "bhavani63data"
+  force_destroy = true
+  tags = {
+    Name        = "bhavani63data"
+    Environment = var.env
+  }
+}
+resource "aws_s3_bucket" "bhavani63logs" {
+  bucket        = "bhavani63logs"
+  force_destroy = true
+  tags = {
+    Name        = "bhavani63logs"
+    Environment = var.env
+  }
+}
 
 
-#terraform import arn:aws:s3:::bhavani63data aws_s3_bucket.bhavani63data
-#terraform import arn:aws:s3:::bhavani63logs aws_s3_bucket.bhavani63logs
-
-
-#terraform import aws_s3_bucket.bhavani63data arn:aws:s3:::bhavani63data
-#terraform import aws_s3_bucket.bhavani63logs arn:aws:s3:::bhavani63logs
+#terraform import aws_s3_bucket.bhavani63data bhavani63data
+#terraform import aws_s3_bucket.bhavani63logs bhavani63logs
+#terraform destroy -target aws_s3_bucket.bhavani63data -target aws_s3_bucket.bhavani63logs
