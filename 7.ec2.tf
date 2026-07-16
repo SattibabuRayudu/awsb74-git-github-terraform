@@ -25,6 +25,10 @@ resource "aws_instance" "webservers" {
 	EOF
   lifecycle {
     prevent_destroy = true
-    ignore_changes  = [tags]
+    ignore_changes = [
+      tags["Tag1"],
+      tags["Tag2"],
+      tags["Tag3"]
+    ]
   }
 }
