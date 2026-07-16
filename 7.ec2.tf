@@ -4,10 +4,6 @@ data "aws_ami" "my_ami" {
   owners      = ["672790302267"]
 }
 
-output "name" {
-  value = data.aws_ami.my_ami.id
-
-}
 
 resource "aws_instance" "webservers" {
     count = 3
