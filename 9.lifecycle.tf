@@ -5,4 +5,7 @@ resource "aws_s3_bucket" "bhavanidemo0001" {
     Name        = "bhavanidemo100"
     Environment = var.env
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
