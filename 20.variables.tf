@@ -1,5 +1,5 @@
 variable "vpc_cidr_block" {
-  type        = string
+  type = string
   #default     = "10.125.0.0/16"
   description = "CIDR Block For VPC"
   validation {
@@ -13,12 +13,12 @@ variable "vpc_cidr_block" {
 }
 
 variable "vpc_name" {
-  type    = string
+  type = string
   #default = "awsb74_vpc_1"
 }
 
 variable "env" {
-  type    = string
+  type = string
   #default = "dev"
   validation {
     condition = contains([
@@ -31,19 +31,19 @@ variable "env" {
 }
 
 variable "azs" {
-  type    = list(any)
+  type = list(any)
   #default = ["us-east-1a", "us-east-1b", "us-east-1c"]
   #                  0            1             2
 }
 
 variable "public_subnet_cidrs" {
-  type    = list(any)
+  type = list(any)
   #default = ["10.125.1.0/24", "10.125.2.0/24", "10.125.3.0/24"]
   #                  0              1               2
 }
 
 variable "private_subnet_cidrs" {
-  type    = list(any)
+  type = list(any)
   #default = ["10.125.10.0/24", "10.125.20.0/24", "10.125.30.0/24"]
   #                  0              1               2
 }
