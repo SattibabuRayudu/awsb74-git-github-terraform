@@ -1,2 +1,2 @@
 instance_type = "t2.micro"
-key_name = "LaptopKey"
+key_name      = "LaptopKey"

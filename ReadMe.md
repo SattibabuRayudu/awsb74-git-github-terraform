@@ -60,12 +60,29 @@ terraform destroy --auto-approve
 
 ## Class-3
 1. Lifecycle meta Arguments
-   - depends_on
    - prevent_destroy
    - create_before_destroy
    - ignore_changes
 2. Importing Resoruces In To Terraform State
 3. Renaming Resource in Terraform State.
+   terraform state mv old_name new_name
 4. Deleting resources from Terraform State.
-5. Dynamic Blocks With Foreach.
+5. Enabling Logging For Terraform using TF_LOG and TF_LOG_PATH
+   - $Env:TF_LOG="TRACE" # TRACE, DEBUG, INFO, WARN or ERROR
+   - export TF_LOG="TRACE"
+   - $Env:TF_LOG_PATH="/tmp/awsb74_terraform_debug.log"
+   - export TF_LOG_PATH="/tmp/awsb74_terraform_debug.log"
 5. Functions Continued.
+   - upper & lower
+   - condition = value ? true : false
+     var.env == "dev" || "Dev" || "DEV" ? 1 : 3
+
+## Class 4
+1. Function Continued
+locals with distinct and toset
+distinct - Removes duplicates and provide a new list.
+toset - Removes duplicates and also removes index order.
+map - key values pairs.
+lookup - Selects Item from a map based on key.
+
+2. Dynamic Blocks With Foreach.
