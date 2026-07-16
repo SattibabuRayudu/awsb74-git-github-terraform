@@ -1,4 +1,4 @@
-resource "aws_s3_bucket" "bhavanidemo0001" {
+resource "aws_s3_bucket" "bhavanidemo100" {
   bucket        = "bhavanidemo100"
   force_destroy = true
   tags = {
