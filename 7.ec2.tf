@@ -6,7 +6,8 @@ data "aws_ami" "my_ami" {
 
 
 resource "aws_instance" "webservers" {
-  count = 1
+  #count = 1
+  count = var.env == "dev" || var.env == "Dev" || var.env == "DEV" ? 1 : 3
   #ami = var.imagename
   #ami = "ami-0d857ff0f5fc4e03b"
   ami                         = data.aws_ami.my_ami.id
