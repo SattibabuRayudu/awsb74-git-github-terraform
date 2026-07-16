@@ -24,7 +24,8 @@ resource "aws_instance" "webservers" {
         sudo apt-get update
 	EOF
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy       = false
+    create_before_destroy = true
     ignore_changes = [
       tags["Tag1"],
       tags["Tag2"],
