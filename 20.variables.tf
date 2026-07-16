@@ -47,3 +47,11 @@ variable "private_subnet_cidrs" {
   #default = ["10.125.10.0/24", "10.125.20.0/24", "10.125.30.0/24"]
   #                  0              1               2
 }
+
+variable instance_type {
+  type        = string
+}
+
+variable key_name {
+  type        = string
+}
