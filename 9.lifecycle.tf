@@ -1,8 +1,8 @@
-resource "aws_s3_bucket" "bhavanidemo0001" {
-  bucket        = "bhavanidemo0001"
+resource "aws_s3_bucket" "bhavanidemo001" {
+  bucket        = "bhavanidemo001"
   force_destroy = true
   tags = {
-    Name        = "bhavanidemo0001"
+    Name        = "bhavanidemo001"
     Environment = var.env
   }
   lifecycle {
