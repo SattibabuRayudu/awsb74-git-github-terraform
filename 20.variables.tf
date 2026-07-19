@@ -68,6 +68,6 @@ variable "bucket_names_suffix" {
   type = list(any)
 }
 
-# variable "try_variable" {
-#  # default = null
-# }
+variable "try_variable" {
+ default = null
+}
