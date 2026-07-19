@@ -3,11 +3,12 @@ locals {
   splittag = split("-","Welcome-To-AWS-Training-In-Telugu")
   customtag002 = join("________",local.splittag)
   try_var = length(trimspace(var.try_variable)) > 0 ? var.try_variable : "Try_Var_Not_Found"
-  #coalesce_var = coalesce(var.try_variable, "try_Var_Not_Found")
+  coalesce_var = coalesce(var.try_variable, "Var_Is_Null_Or_Empty_1", "Var_Is_Null_Or_Empty_2")
 }
 
 
-
+#The try() function only triggers the fallback on runtime errors (like missing attributes), not empty values.
+#coalesce() function returns the first argument that is not null and not empty.
 
 resource "aws_instance" "webservers" {
   #count = 1
@@ -26,7 +27,7 @@ resource "aws_instance" "webservers" {
     CustomTag1 = local.customtag001
     CustomTag2 = local.customtag002
     CustomTag3 = local.try_var
-    #CustomTag4 = local.coalesce_var
+    CustomTag4 = local.coalesce_var
   }
   user_data = <<-EOF
 		#!/bin/bash
