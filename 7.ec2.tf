@@ -1,3 +1,10 @@
+locals {
+  customtag = join("__",[var.vpc_name,var.env,"tag-01"])
+}
+
+
+
+
 resource "aws_instance" "webservers" {
   #count = 1
   count = var.env == "dev" || var.env == "Dev" || var.env == "DEV" ? 1 : 3
@@ -12,7 +19,7 @@ resource "aws_instance" "webservers" {
   tags = {
     Name      = "awsb74_vpc_1_public_server_0${count.index + 1}"
     Env       = var.env
-    CustomTag = "${var.vpc_name}-${var.env}-tag-01"
+    CustomTag = local.customtag
   }
   user_data = <<-EOF
 		#!/bin/bash
