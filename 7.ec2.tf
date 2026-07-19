@@ -6,6 +6,10 @@ locals {
   coalesce_var = coalesce(var.try_variable, "Var_Is_Null_Or_Empty_1", "Var_Is_Null_Or_Empty_2")
 }
 
+output "coalesce_var" {
+  value = local.coalesce_var
+}
+
 
 #The try() function only triggers the fallback on runtime errors (like missing attributes), not empty values.
 #coalesce() function returns the first argument that is not null and not empty.
