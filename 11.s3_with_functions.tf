@@ -34,7 +34,7 @@ resource "aws_s3_bucket_public_access_block" "bhavanibucks" {
 resource "aws_s3_bucket_policy" "demo_allow_all_bhavanibucks" {
   count      = 3
   bucket     = "bhavanibucks${count.index + 1}"
-  depends_on = [aws_s3_bucket_public_access_block.bhavanibucks]
+  depends_on = [aws_s3_bucket_public_access_block.demo]
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
