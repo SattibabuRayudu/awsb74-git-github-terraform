@@ -57,7 +57,7 @@ variable "key_name" {
 }
 
 variable "ami_id" {
-  type = string
+  type = map(string)
 }
 
 variable "aws_region" {
