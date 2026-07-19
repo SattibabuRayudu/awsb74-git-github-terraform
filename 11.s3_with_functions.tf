@@ -13,10 +13,10 @@ output bucket_names_suffix_2 {
 
 resource "aws_s3_bucket" "bhavanibucks" {
   count         = length(local.bucket_names_suffix_1)
-  bucket        = "bhavanibuckets${count.index + 1}"
+  bucket        = "bhavanibucks${local.bucket_names_suffix_1[count.index]}"
   force_destroy = true
   tags = {
-    Name        = "bhavanibuckets${count.index + 1}"
+    Name        = "bhavanibucks${local.bucket_names_suffix_1[count.index]}"
     Environment = var.env
   }
 }
