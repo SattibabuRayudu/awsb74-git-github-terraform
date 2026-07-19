@@ -1,7 +1,7 @@
 vpc_cidr_block = "10.125.0.0/16"
 vpc_name       = "awsb74_vpc_1"
 env            = "dev"
-aws_region = "us-east-1"
+aws_region     = "us-east-1"
 azs = [
   "us-east-1a",
   "us-east-1b",
