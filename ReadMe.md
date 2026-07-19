@@ -79,10 +79,12 @@ terraform destroy --auto-approve
 
 ## Class 4
 1. Function Continued
+map - key values pairs.
+lookup - Selects Item from a map based on key.
+join() and contcat() with locals
 locals with distinct and toset
 distinct - Removes duplicates and provide a new list.
 toset - Removes duplicates and also removes index order.
-map - key values pairs.
-lookup - Selects Item from a map based on key.
+try & null
 
 2. Dynamic Blocks With Foreach.
