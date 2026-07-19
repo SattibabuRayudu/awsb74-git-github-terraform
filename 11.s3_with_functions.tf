@@ -21,7 +21,7 @@ resource "aws_s3_bucket" "bhavanibucks" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "bhavanibucks" {
+resource "aws_s3_bucket_public_access_block" "demo" {
   count                   = 3
   bucket                  = element(aws_s3_bucket.bhavanibucks[*].id, count.index)
   block_public_acls       = false
