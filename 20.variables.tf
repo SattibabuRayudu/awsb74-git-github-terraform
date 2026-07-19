@@ -69,5 +69,5 @@ variable "bucket_names_suffix" {
 }
 
 variable "try_variable" {
-  default = null
+ # default = null
 }
