@@ -22,8 +22,8 @@ resource "aws_s3_bucket" "bhavanibucks" {
 }
 
 resource "aws_s3_bucket_public_access_block" "bhavanibucks" {
-  count                   = 3
-  bucket                  = element(aws_s3_bucket.bhavanibucks[*].id, count.index)
+  count                   = length(local.bucket_names_suffix_1)
+  bucket                  = aws_s3_bucket.bhavanibucks[count.index].id
   block_public_acls       = false
   block_public_policy     = false # ← this must be false
   ignore_public_acls      = false
@@ -32,8 +32,8 @@ resource "aws_s3_bucket_public_access_block" "bhavanibucks" {
 
 
 resource "aws_s3_bucket_policy" "demo_allow_all_bhavanibucks" {
-  count      = 3
-  bucket     = "bhavanibucks${count.index + 1}"
+  count      = length(local.bucket_names_suffix_1)
+  bucket     = aws_s3_bucket.bhavanibucks[count.index].id
   depends_on = [aws_s3_bucket_public_access_block.bhavanibucks]
   policy = jsonencode({
     Version = "2012-10-17"
@@ -43,8 +43,8 @@ resource "aws_s3_bucket_policy" "demo_allow_all_bhavanibucks" {
         Principal = "*"
         Action    = "s3:GetObject"
         Resource = [
-          element(aws_s3_bucket.bhavanibucks[*].arn, count.index),
-          "${element(aws_s3_bucket.bhavanibucks[*].arn, count.index)}/*"
+          aws_s3_bucket.bhavanibucks[count.index].arn,
+          "${aws_s3_bucket.bhavanibucks[count.index].arn}/*"
         ]
       }
     ]
