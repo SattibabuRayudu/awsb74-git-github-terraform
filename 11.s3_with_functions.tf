@@ -21,7 +21,7 @@ resource "aws_s3_bucket" "bhavanibucks" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "demo" {
+resource "aws_s3_bucket_public_access_block" "bhavanibucks" {
   count                   = 3
   bucket                  = element(aws_s3_bucket.bhavanibucks[*].id, count.index)
   block_public_acls       = false
@@ -34,7 +34,7 @@ resource "aws_s3_bucket_public_access_block" "demo" {
 resource "aws_s3_bucket_policy" "demo_allow_all_bhavanibucks" {
   count      = 3
   bucket     = "bhavanibucks${count.index + 1}"
-  depends_on = [aws_s3_bucket_public_access_block.demo]
+  depends_on = [aws_s3_bucket_public_access_block.bhavanibucks]
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
