@@ -64,3 +64,6 @@ variable "aws_region" {
   type = string
 }
 
+variable "bucket_names_suffix" {
+  type = list(any)
+}
