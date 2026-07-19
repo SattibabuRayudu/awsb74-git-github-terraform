@@ -2,7 +2,8 @@ locals {
   customtag001 = join("__",[var.vpc_name,var.env,"tag-01"])
   splittag = split("-","Welcome-To-AWS-Training-In-Telugu")
   customtag002 = join("________",local.splittag)
-  try_var = try(var.try_variable, "Try_Var_Not_Found")
+  try_var = length(trimspace(var.try_variable)) > 0 ? var.try_variable : "Try_Var_Not_Found"
+  coalesce_var = coalesce(var.try_variable, "try_Var_Not_Found")
 }
 
 
@@ -25,6 +26,7 @@ resource "aws_instance" "webservers" {
     CustomTag1 = local.customtag001
     CustomTag2 = local.customtag002
     CustomTag3 = local.try_var
+    CustomTag4 = local.coalesce_var
   }
   user_data = <<-EOF
 		#!/bin/bash
