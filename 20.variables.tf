@@ -67,3 +67,7 @@ variable "aws_region" {
 variable "bucket_names_suffix" {
   type = list(any)
 }
+
+variable "try_variable" {
+  default = null
+}
