@@ -1,16 +1,9 @@
-data "aws_ami" "my_ami" {
-  most_recent = true
-  name_regex  = "^AWS-B74"
-  owners      = ["672790302267"]
-}
-
-
 resource "aws_instance" "webservers" {
   #count = 1
   count = var.env == "dev" || var.env == "Dev" || var.env == "DEV" ? 1 : 3
   #ami = var.imagename
   #ami = "ami-0d857ff0f5fc4e03b"
-  ami                         = data.aws_ami.my_ami.id
+  ami                         = lookup(var.ami_id,var.aws_region)
   instance_type               = var.instance_type
   key_name                    = var.key_name
   subnet_id                   = element(aws_subnet.awsb74_vpc_1_public_subnets[*].id, count.index)
@@ -19,6 +12,7 @@ resource "aws_instance" "webservers" {
   tags = {
     Name = "awsb74_vpc_1_public_server_0${count.index + 1}"
     Env  = var.env
+    CustomTag = "${var.vpc_name}-${var.env}-tag-01"
   }
   user_data = <<-EOF
 		#! /bin/bash
