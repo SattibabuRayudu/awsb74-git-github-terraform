@@ -8,7 +8,7 @@ resource "aws_instance" "private_servers" {
   vpc_security_group_ids = [aws_security_group.awsb74_vpc_sg.id]
 
   tags = {
-    Name       = "awsb74_vpc_1_new_server_0${count.index + 1}"
+    Name       = "awsb74_vpc_1__server_0${count.index + 1}"
     Env        = var.env
     CustomTag1 = local.customtag001
     CustomTag2 = local.customtag002
@@ -33,7 +33,7 @@ resource "aws_instance" "private_servers" {
 
     connection {
       type        = "ssh"
-      user        = "ubuntu"
+      user        = "/root/"
       private_key = file("~/.ssh/my-key.pem")
       host        = self.public_ip
     }
@@ -47,7 +47,7 @@ resource "aws_instance" "private_servers" {
 
     connection {
       type        = "ssh"
-      user        = "ubuntu"
+      user        = "/root/"
       private_key = file("~/.ssh/my-key.pem")
       host        = self.public_ip
     }
