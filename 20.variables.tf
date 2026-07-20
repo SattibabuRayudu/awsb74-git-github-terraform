@@ -84,15 +84,3 @@ variable "additional_volumes" {
   }))
 }
 
-variable "ssh_user" {
-  description = "SSH username used by Terraform provisioners for the EC2 instance"
-  type        = string
-  default     = "ubuntu"
-}
-
-variable "private_key_path" {
-  description = "Path to the private SSH key on the machine running Terraform"
-  type        = string
-  default     = "~/.ssh/my-key.pem"
-}
-
