@@ -33,7 +33,7 @@ resource "aws_instance" "private_servers" {
 
     connection {
       type        = "ssh"
-      user        = "/root/"
+      user        = "ubuntu"
       private_key = file("~/.ssh/my-key.pem")
       host        = self.public_ip
     }
@@ -47,7 +47,7 @@ resource "aws_instance" "private_servers" {
 
     connection {
       type        = "ssh"
-      user        = "/root/"
+      user        = "ubuntu"
       private_key = file("~/.ssh/my-key.pem")
       host        = self.public_ip
     }
