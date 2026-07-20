@@ -24,3 +24,27 @@ ami_id = {
 }
 
 bucket_names_suffix = ["1000", "1001", "1002", "1000", "1001", "1002", "1000", "1001", "1002"]
+
+instance_types = {
+  dev  = "t2.micro"
+  prod = "t3.micro"
+}
+
+additional_volumes = [
+  {
+    device_name = "/dev/sdf"
+    size        = 2
+    type        = "gp2"
+  },
+  {
+    device_name = "/dev/sdg"
+    size        = 3
+    type        = "gp3"
+  },
+  {
+    device_name = "/dev/sdh"
+    size        = 4
+    type        = "io1"
+    iops        = 5
+  },
+]

@@ -71,3 +71,16 @@ variable "bucket_names_suffix" {
 variable "try_variable" {
   default = ""
 }
+
+
+variable "instance_types" {}
+
+variable "additional_volumes" {
+  description = "List of additional EBS volumes"
+  type = list(object({
+    device_name = string
+    size = number
+    type = string
+  }))
+}
+
