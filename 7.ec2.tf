@@ -1,8 +1,8 @@
 locals {
-  customtag001 = join("__",[var.vpc_name,var.env,"tag-01"])
-  splittag = split("-","Welcome-To-AWS-Training-In-Telugu")
-  customtag002 = join("________",local.splittag)
-  try_var = length(trimspace(var.try_variable)) > 0 ? var.try_variable : "Try_Var_Not_Found"
+  customtag001 = join("__", [var.vpc_name, var.env, "tag-01"])
+  splittag     = split("-", "Welcome-To-AWS-Training-In-Telugu")
+  customtag002 = join("________", local.splittag)
+  try_var      = length(trimspace(var.try_variable)) > 0 ? var.try_variable : "Try_Var_Not_Found"
   coalesce_var = coalesce(var.try_variable, "Var_Is_Null_Or_Empty_1", "Var_Is_Null_Or_Empty_2")
 }
 
@@ -26,8 +26,8 @@ resource "aws_instance" "webservers" {
   vpc_security_group_ids      = ["${aws_security_group.awsb74_vpc_sg.id}"]
   associate_public_ip_address = true
   tags = {
-    Name      = "awsb74_vpc_1_public_server_0${count.index + 1}"
-    Env       = var.env
+    Name       = "awsb74_vpc_1_public_server_0${count.index + 1}"
+    Env        = var.env
     CustomTag1 = local.customtag001
     CustomTag2 = local.customtag002
     CustomTag3 = local.try_var

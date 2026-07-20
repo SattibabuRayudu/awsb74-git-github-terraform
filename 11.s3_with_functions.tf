@@ -1,13 +1,13 @@
 locals {
-    bucket_names_suffix_1 = distinct(var.bucket_names_suffix)
-    bucket_names_suffix_2 = toset(var.bucket_names_suffix)
+  bucket_names_suffix_1 = distinct(var.bucket_names_suffix)
+  bucket_names_suffix_2 = toset(var.bucket_names_suffix)
 }
 
-output bucket_names_suffix_1 {
-    value = local.bucket_names_suffix_1
+output "bucket_names_suffix_1" {
+  value = local.bucket_names_suffix_1
 }
-output bucket_names_suffix_2 {
-    value = local.bucket_names_suffix_2
+output "bucket_names_suffix_2" {
+  value = local.bucket_names_suffix_2
 }
 
 
