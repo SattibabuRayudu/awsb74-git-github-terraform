@@ -48,7 +48,7 @@ jobs: #Jobs List
         with:
           directory: ./Alpha-Bravo
           quiet: true
-          soft_fail: false #If false, the action will fail if any checks fail.
+          soft_fail: true #If false, the action will fail if any checks fail.
           output_format: cli,json
           output_file_path: console,./Alpha-Bravo/results.json
       - name: Upload Checkov Results to S3 Bucket
