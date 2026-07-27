@@ -1,12 +1,12 @@
 name: Terraform Deployment Pipeline For AWS Batch 74
 on:
-  # pull_request:
-  #   types:
-  #   - closed
-  #   branches:
-  #     - production
-  #   paths-ignore:
-  #     - 'ReadMe.md'
+  pull_request:
+    types:
+    - closed
+    branches:
+      - production
+    paths-ignore:
+      - 'ReadMe.md'
   push:
     branches: 
     - production
@@ -162,4 +162,41 @@ jobs: #Jobs List
            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
          fi
      - name: List Terraform Created Resources
-       run: terraform state list        
+       run: terraform state list 
+
+  terraform-destroy:
+    if: ${{ vars.TERRAFORM_DESTROY == 'YES' }}  
+    #if: ${{ env.ENV_DESTROY == 'YES' }} - This Wont Work Here As ENV_DESTROY Is An Env Variable And Not A GitHub Variable.
+    name: 'Stage_5 - Terraform Destroy'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Print Branch Name
+        run: echo ${GITHUB_REF}
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Print Branch Reference
+        run: echo The Current Branch Is $GITHUB_REF
+      - name: Perform Terraform Destroy
+        run: |
+          if [[ ${GITHUB_REF} == 'refs/heads/development' && ${{ env.ENV_DESTROY_DEV }} == 'YES' ]]; then
+            echo "Running Terraform Destroy For Development Environment"
+            terraform workspace select dev
+            terraform destroy --var-file=Alpha.tfvars --auto-approve
+          elif [[ ${GITHUB_REF} == 'refs/heads/production' && ${{ env.ENV_DESTROY_PROD }} == 'YES' ]]; then
+            echo "Running Terraform Destroy For Production Environment"
+            terraform workspace select prod
+            terraform destroy --var-file=Bravo.tfvars --auto-approve
+          else
+            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
+          fi       
