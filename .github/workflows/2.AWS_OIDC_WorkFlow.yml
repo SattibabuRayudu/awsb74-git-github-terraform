@@ -213,4 +213,4 @@ jobs: #Jobs List
             terraform destroy --var-file=Bravo.tfvars --auto-approve
           else
             echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
-          fi 
+          fi  
