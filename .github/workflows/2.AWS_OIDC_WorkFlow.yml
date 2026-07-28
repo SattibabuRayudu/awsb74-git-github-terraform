@@ -27,7 +27,7 @@ env:
   ENV_DESTROY_DEV: "NO"
   ENV_DESTROY_PROD: "NO"
   TERRAFORM_DESTROY: ${{ vars.TERRAFORM_DESTROY}}
-  TERRAFORM_VERSION: "1.14.4"
+  TERRAFORM_VERSION: "1.15.8"
 
 permissions:
   id-token: write   # This is required for requesting the JWT
