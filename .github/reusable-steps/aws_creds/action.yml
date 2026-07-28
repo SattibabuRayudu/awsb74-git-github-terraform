@@ -1,0 +1,12 @@
+name: Reusable Steps Workflow For Checkov For Batch 74
+description: Demonstrate how to use reusable steps in a workflow
+runs:
+  using: 'composite'  
+  steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: "arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role"
+        role-session-name: github-action-oidc-role
+        aws-region: "us-east-1"
+# Composite actions, as mentioned earlier, allow you to combine multiple steps into a single action. This is useful when you have a sequence of steps that you use frequently in your workflows. By creating a composite action, you can reuse this sequence of steps with just a single line in your workflow file.
