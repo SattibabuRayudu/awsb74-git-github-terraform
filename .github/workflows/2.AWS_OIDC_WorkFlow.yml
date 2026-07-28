@@ -1,0 +1,216 @@
+name: Terraform Deployment Pipeline With OIDC & Reusable Steps For Batch 73
+on:
+  pull_request:
+    types:
+    - closed
+    branches:
+      - production
+    paths-ignore:
+      - 'ReadMe.md'
+  push:
+    branches:
+    #- production
+    - development
+    paths-ignore:
+    - 'ReadMe.md'
+
+#We need to add Production under push because GitHub Actions consider PR merges as push events to the target branch.
+#GitHub Actions workflows on the destination branch (e.g., main) trigger automatically 
+#on push events from PR merges, as the merge commit counts as a push to that branch. 
+#To force a specific workflow on the destination branch when a PR targeting it is closed/merged, 
+#combine pull_request with closed triggers and conditions checking the base branch.
+
+env:
+  #AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ vars.AWS_REGION}}
+  ENV_DESTROY_DEV: "NO"
+  ENV_DESTROY_PROD: "NO"
+  TERRAFORM_DESTROY: ${{ vars.TERRAFORM_DESTROY}}
+  TERRAFORM_VERSION: "1.14.4"
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs: #Jobs List
+  terraform-checkov:
+    if: ${{ vars.TERRAFORM_DESTROY == 'NO' }}
+    name: 'Stage_1 - Checkov Security Scanning For Terraform Code'
+    runs-on: ubuntu-latest #Default Runner Provided By GitHub.
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Checkout The Code Repository
+        uses: actions/checkout@v5
+      - name: Use reusable steps
+        uses: ./.github/reusable-steps/aws_creds      
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Setup Checkov For Security Scanning
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ./Alpha-Bravo
+          quiet: true
+          soft_fail: true #If false, the action will fail if any checks fail..
+          output_format: cli,json
+          output_file_path: console,./Alpha-Bravo/results.json
+      - name: Upload Checkov Results to S3 Bucket
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role
+          aws-region: us-east-1
+      - run: aws s3 cp results.json s3://rayudu-terraform-modules/
+
+  terraform-initiate:
+    if: ${{ vars.TERRAFORM_DESTROY == 'NO' }}
+    name: 'Stage_2 - Terraform Initialization, Formatting, Validation, and Workspace Creation'
+    runs-on: ubuntu-latest
+    needs: terraform-checkov
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Use reusable steps
+        uses: ./.github/reusable-steps/aws_creds  
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Print Branch Name
+        run: echo ${GITHUB_REF}
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Creating Terraform Workspaces
+        run: |
+          terraform workspace select dev || terraform workspace new dev
+          terraform workspace select prod || terraform workspace new prod
+      - name: List Terraform Workspaces
+        run: terraform workspace list
+
+  terraform-plan:
+    if: ${{ vars.TERRAFORM_DESTROY == 'NO' }}
+    name: 'Stage_3 - Terraform Plan'
+    runs-on: ubuntu-latest
+    needs: terraform-initiate
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Use reusable steps
+        uses: ./.github/reusable-steps/aws_creds  
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Print Branch Name
+        run: echo ${GITHUB_REF}
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Print Branch Reference
+        run: echo The Current Branch Is $GITHUB_REF
+      - name: Terraform Plan
+        run: |
+          if [[ ${GITHUB_REF} == 'refs/heads/development' && ${{ env.ENV_DESTROY_DEV }} == 'NO' ]]; then
+            echo "Running Terraform Plan For Development Branch"
+            terraform workspace select dev
+            terraform plan --var-file=Alpha.tfvars
+          elif [[ ${GITHUB_REF} == 'refs/heads/production' && ${{ env.ENV_DESTROY_PROD }} == 'NO' ]]; then
+            echo "Running Terraform Plan For Production Branch"
+            terraform workspace select prod
+            terraform plan --var-file=Bravo.tfvars
+          else
+            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
+          fi
+
+  terraform-apply:
+    if: ${{ vars.TERRAFORM_DESTROY == 'NO' }}
+    name: 'Stage_4 - Terraform Apply'
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Use reusable steps
+        uses: ./.github/reusable-steps/aws_creds  
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Print Branch Name
+        run: echo ${GITHUB_REF}
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Print Branch Reference
+        run: echo The Current Branch Is $GITHUB_REF
+      - name: Terraform Apply
+        run: |
+          if [[ ${GITHUB_REF} == 'refs/heads/development' && ${{ env.ENV_DESTROY_DEV }} == 'NO' ]]; then
+            echo "Running Terraform Plan For Development Environment"
+            terraform workspace select dev
+            terraform apply --var-file=Alpha.tfvars --auto-approve
+          elif [[ ${GITHUB_REF} == 'refs/heads/production' && ${{ env.ENV_DESTROY_PROD }} == 'NO' ]]; then
+            echo "Running Terraform Plan For Production Environment"
+            terraform workspace select prod
+            terraform apply --var-file=Bravo.tfvars --auto-approve
+          else
+            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
+          fi
+      - name: List Terraform Created Resources
+        run: terraform state list
+
+  terraform-destroy:
+    if: ${{ vars.TERRAFORM_DESTROY == 'YES' }}  
+    #if: ${{ env.ENV_DESTROY == 'YES' }} - This Wont Work Here As ENV_DESTROY Is An Env Variable And Not A GitHub Variable.
+    name: 'Stage_5 - Terraform Destroy'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Use reusable steps
+        uses: ./.github/reusable-steps/aws_creds  
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Print Branch Name
+        run: echo ${GITHUB_REF}
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Print Branch Reference
+        run: echo The Current Branch Is $GITHUB_REF
+      - name: Perform Terraform Destroy
+        #if: env.ENV_DESTROY == 'YES'
+        run: |
+          echo ${{ env.ENV_DESTROY_DEV }}
+          echo ${{ env.ENV_DESTROY_PROD }}
+          if [[ ${GITHUB_REF} == 'refs/heads/development' && ${{ env.ENV_DESTROY_DEV }} == 'YES' ]]; then
+            echo "Running Terraform Destroy For Development Environment"
+            terraform workspace select dev
+            terraform destroy --var-file=Alpha.tfvars --auto-approve
+          elif [[ ${GITHUB_REF} == 'refs/heads/production' && ${{ env.ENV_DESTROY_PROD }} == 'YES' ]]; then
+            echo "Running Terraform Destroy For Production Environment"
+            terraform workspace select prod
+            terraform destroy --var-file=Bravo.tfvars --auto-approve
+          else
+            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
+          fi 

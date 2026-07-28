@@ -5,7 +5,7 @@
             "Effect": "Allow",
             "Action": "sts:AssumeRoleWithWebIdentity",
             "Principal": {
-                "Federated": "arn:aws:iam::053490018989:oidc-provider/token.actions.githubusercontent.com"
+                "Federated": "arn:aws:iam::534344665033:oidc-provider/token.actions.githubusercontent.com"
             },
             "Condition": {
                 "StringEquals": {
@@ -15,9 +15,8 @@
                 },
                 "StringLike": {
                     "token.actions.githubusercontent.com:sub": [
-                        "repo:SreeVeerDevOps/awsb72-git-github-terraform:*",
-                        "repo:SreeVeerDevOps/DevSecOPsB46-AWSB69-GitHub-Actions-2:*",
-                        "repo:SreeVeerDevOps/DevSecOPsB46-AWSB69-GitHub-Actions-3:*"
+                        "repo:SattibabuRayudu/awsb74-git-github-terraform:ref:refs/heads/development",
+                        "repo:SattibabuRayudu/awsb74-git-github-terraform:ref:refs/heads/production"
                     ]
                 }
             }
