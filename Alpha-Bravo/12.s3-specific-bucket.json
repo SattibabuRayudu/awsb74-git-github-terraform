@@ -1,13 +1,13 @@
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": "s3:*",
-            "Resource": [
-                "arn:aws:s3:::awsb72-terraform-modules",
-                "arn:aws:s3:::awsb72-terraform-modules/*"
-            ]
-        }
-    ]
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": "s3:*",
+			"Resource": [
+				"arn:aws:s3:::rayudu-terraform-modules",
+				"arn:aws:s3:::rayudu-terraform-modules/*"
+			]
+		}
+	]
 }

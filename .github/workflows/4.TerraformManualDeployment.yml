@@ -1,0 +1,285 @@
+# Workflow Dispatch Workflow Will Be Visible If The Code Is In The Default Branch Only. 
+# Make sure you are in the default branch to see the workflow in Actions Tab.
+# For the batch 74 I have changed the default branch from master to development.
+---
+name: Workflow Dispath For Running AWS Terraform Code Batch 74
+on:
+  workflow_dispatch:
+    inputs:
+      TERRAFORM:
+        description: 'Shall We Run Terraform Scan/Plan/Apply/Destroy/Drift?'    
+        required: true
+        default: 'CHECKOV'
+        type: choice
+        options:
+        - CHECKOV
+        - PLAN
+        - APPLY
+        - DESTROY
+        - DRIFT
+        - PARALLEL
+      Deployed_By:
+        description: 'Enter Name/Email Of Who Deployed The Code?'
+        required: true
+        default: 'devops_team@awsb74.com'
+        type: string
+
+env:
+  #AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: "us-east-1"
+  TERRAFORM_DESTROY: "NO"
+  TERRAFORM_VERSION: "1.15.8"
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  terraform-checkov:
+    if: ${{ github.event.inputs.TERRAFORM == 'CHECKOV' }}
+    name: 'Stage_1 - Checkov Scan'
+    runs-on: [self-hosted, terraform, awsb74]
+    #runs-on: ubuntu-latest 
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role"
+          role-session-name: github-action-oidc-role
+          aws-region: "us-east-1"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ./Alpha-Bravo
+          quiet: true
+          soft_fail: fail #Proceed with the workflow even if checkov fails
+          output_format: cli,json
+          output_file_path: console,./Alpha-Bravo/results.json
+      - name: Upload file to bucket
+        uses: koraykoska/s3-upload-github-action@master
+        env:
+          FILE: ./Alpha-Bravo/results.json
+          S3_ENDPOINT: 's3.us-east-1.amazonaws.com'
+          S3_BUCKET: "rayudu-terraform-modules"
+          #S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
+          #S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+      # - name: 'Stage_6 - Slack Notification'
+      #   uses: act10ns/slack@v2
+      #   if: always()  # Runs regardless of job outcome
+      #   with:
+      #     status: ${{ job.status }}
+      #     steps: ${{ toJson(steps) }}  # Includes step details
+      #     channel: '#devsecopsb50'    # Optional: override default channel
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  terraform-initiate:
+    if: ${{ github.event.inputs.TERRAFORM == 'APPLY' || github.event.inputs.TERRAFORM == 'PLAN' || github.event.inputs.TERRAFORM == 'DESTROY' || github.event.inputs.TERRAFORM == 'DRIFT' }}
+    name: 'Stage_2 - Terraform Initialization'
+    runs-on: [self-hosted, terraform, awsb74, actions]
+    #runs-on: ubuntu-latest 
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role"
+          role-session-name: github-action-oidc-role
+          aws-region: "us-east-1"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Print Branch Reference
+        run: echo The Current Branch Is $GITHUB_REF
+      - name: Creating Terraform Workspace
+        run: |
+          terraform workspace select dev || terraform workspace new dev
+          terraform workspace select prod || terraform workspace new prod
+          terraform workspace list
+      - name: 'Stage_6 - Slack Notification'
+        uses: act10ns/slack@v2
+        if: always()  # Runs regardless of job outcome
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}  # Includes step details
+          channel: '#devsecopsb50'    # Optional: override default channel
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  terraform-plan:
+    if: ${{ github.event.inputs.TERRAFORM == 'PLAN' }}
+    name: 'Stage_3 - Terraform Plan'
+    runs-on: [self-hosted, terraform, awsb74]
+    #runs-on: ubuntu-latest 
+    needs: terraform-initiate
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role"
+          role-session-name: github-action-oidc-role
+          aws-region: "us-east-1"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Print Branch Reference
+        run: echo The Current Branch Is $GITHUB_REF
+      - name: Terraform Plan
+        if: env.TERRAFORM_DESTROY == 'NO'
+        run: |
+          if [ ${GITHUB_REF} == 'refs/heads/development' ]; then
+            echo "Running Terraform Plan For Development Environment"
+            terraform workspace select dev
+            terraform plan --var-file=Alpha.tfvars
+          elif [ ${GITHUB_REF} == 'refs/heads/production' ]; then
+            echo "Running Terraform Plan For Production Environment"
+            terraform workspace select prod
+            terraform plan --var-file=Bravo.tfvars
+          else
+            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
+          fi
+      - name: 'Stage_6 - Slack Notification'
+        uses: act10ns/slack@v2
+        if: always()  # Runs regardless of job outcome
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}  # Includes step details
+          channel: '#devsecopsb50'    # Optional: override default channel
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  terraform-apply:
+    if: ${{ github.event.inputs.TERRAFORM == 'APPLY' }}
+    name: 'Stage_4 - Terraform Apply'
+    runs-on: [self-hosted, terraform, awsb74, actions]
+    #runs-on: ubuntu-latest  
+    needs: terraform-initiate
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role"
+          role-session-name: github-action-oidc-role
+          aws-region: "us-east-1"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Print Branch Reference
+        run: echo The Current Branch Is $GITHUB_REF
+      - name: Terraform Apply
+        if: env.TERRAFORM_DESTROY == 'NO'
+        run: |
+          if [ ${GITHUB_REF} == 'refs/heads/development' ]; then
+            echo "Running Terraform Apply For Development Environment"
+            terraform workspace select dev
+            terraform apply --var-file=Alpha.tfvars --auto-approve
+          elif [ ${GITHUB_REF} == 'refs/heads/production' ]; then
+            echo "Running Terraform Apply For Production Environment"
+            terraform workspace select prod
+            terraform apply --var-file=Bravo.tfvars --auto-approve
+          else
+            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
+          fi
+      - name: 'Stage_6 - Slack Notification'
+        uses: act10ns/slack@v2
+        if: always()  # Runs regardless of job outcome
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}  # Includes step details
+          channel: '#devsecopsb50'    # Optional: override default channel
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  terraform-destroy:
+    if: ${{ github.event.inputs.TERRAFORM == 'DESTROY' }}
+    name: 'Stage_5 - Terraform Destroy'
+    runs-on: [self-hosted, terraform, awsb74]
+    #runs-on: ubuntu-latest 
+    needs: terraform-initiate
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role"
+          role-session-name: github-action-oidc-role
+          aws-region: "us-east-1"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "${{ env.TERRAFORM_VERSION }}"
+      - name: Print Runner Hostname
+        run: echo $HOSTNAME
+      - name: Terraform Init, Format, Validate
+        run: terraform init && terraform fmt && terraform validate
+      - name: Print Branch Reference
+        run: echo The Current Branch Is $GITHUB_REF
+      - name: Terraform Destroy
+        run: |
+          if [ ${GITHUB_REF} == 'refs/heads/development' ]; then
+            echo "Running Terraform Destroy For Development Environment"
+            terraform workspace select dev
+            terraform destroy --var-file=Alpha.tfvars --auto-approve
+          elif [ ${GITHUB_REF} == 'refs/heads/production' ]; then
+            echo "Running Terraform Destroy For Production Environment"
+            terraform workspace select prod
+            terraform destroy --var-file=Bravo.tfvars --auto-approve
+          else
+            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
+          fi
+      - name: 'Stage_6 - Slack Notification'
+        uses: act10ns/slack@v2
+        if: always()  # Runs regardless of job outcome
+        with:
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}  # Includes step details
+          channel: '#devsecopsb50'    # Optional: override default channel
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          
+  testing-reusable-parallel-jobs:
+    if: ${{ github.event.inputs.TERRAFORM == 'PARALLEL' }}
+    name: 'Using Destroy Reusable Workflow' 
+    uses: ./.github/workflows/ReusableJobWorkflowParalleljobs.yml
+    secrets: inherit
+
+
+
+
+
+

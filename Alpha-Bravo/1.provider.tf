@@ -15,7 +15,7 @@ terraform {
   }
   backend "s3" {
     bucket = "rayudu-terraform-modules"
-    key    = "customer_workspace_awsb74.tfstate"
+    key    = "GitHub-OIDC-Class.tfstate"
     region = "us-east-1"
     use_lockfile = true
   }

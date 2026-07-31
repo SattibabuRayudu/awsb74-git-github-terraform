@@ -1,0 +1,74 @@
+name: Testing Parallel Jobs in Reusable Workflow
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+  
+jobs:
+  lint-1:
+    runs-on: [self-hosted, terraform, awsb73]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run linting
+        run: echo "Running Job On github-Runner-1"
+      - name: Print 1 to 10 With Sleep 1s
+        run: |
+          for i in {1..10}
+          do
+            echo "Number: $i"
+            sleep 2
+          done
+  test-1:
+    runs-on: [self-hosted, terraform, awsb73, actions]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: echo "Running Job On github-Runner-2"
+      - name: Print 1 to 10 With Sleep 1s
+        run: |
+          for i in {1..10}
+          do
+            echo "Number: $i"
+            sleep 2
+          done
+  lint-2:
+    runs-on: [self-hosted, terraform, awsb73]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run linting
+        run: echo "Running Job On github-Runner-1"
+      - name: Print 1 to 10 With Sleep 1s
+        run: |
+          for i in {1..10}
+          do
+            echo "Number: $i"
+            sleep 2
+          done
+  test-2:
+    runs-on: [self-hosted, terraform, awsb73, actions]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests
+        run: echo "Running Job On github-Runner-2"
+      - name: Print 1 to 10 With Sleep 1s
+        run: |
+          for i in {1..10}
+          do
+            echo "Number: $i"
+            sleep 2
+          done
+  securefile-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Retrieve the secret and decode it to a file
+        env:
+          SECURE_FILE_CONTENT: ${{ secrets.SECUREFILE }}
+        run: |
+          echo $SECURE_FILE_CONTENT | base64 --decode > securefile.txt
+          cat securefile.txt
+
+# Reusable workflows allow you to reuse an entire workflow, including all its jobs and steps. This is useful when you have a complete CI/CD process that you want to use across multiple repositories. By creating a reusable workflow, you can maintain a single source of truth for your CI/CD process and promote best practices across your organization.
