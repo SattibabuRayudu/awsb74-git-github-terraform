@@ -1,4 +1,4 @@
-name: Terraform Destroy Reusable Workflow
+name: Terraform Plan Reusable Workflow
 on:
   workflow_call:
     inputs:
@@ -32,7 +32,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: "arn:aws:iam::053490018989:role/awsb74-github-actions-oidc-role"
+          role-to-assume: "arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role"
           role-session-name: github-action-oidc-role
           aws-region: "us-east-1"
       - name: Checkout
@@ -55,16 +55,16 @@ jobs:
           terraform workspace select dev || terraform workspace new dev
           terraform workspace select prod || terraform workspace new prod
           terraform workspace list
-      - name: Terraform Destroy
+      - name: Terraform Plan
         run: |
-          if [[ ${GITHUB_REF} == 'refs/heads/development' && ${{ env.ENV_DESTROY_DEV }} == 'YES' ]]; then
-            echo "Running Terraform Destroy For Development Environment"
+          if [[ ${GITHUB_REF} == 'refs/heads/development' && ${{ env.ENV_DESTROY_DEV }} == 'NO' ]]; then
+            echo "Running Terraform Plan For Development Environment"
             terraform workspace select dev
-            terraform destroy --var-file=Alpha.tfvars --auto-approve
-          elif [[ ${GITHUB_REF} == 'refs/heads/production' && ${{ env.ENV_DESTROY_PROD }} == 'YES' ]]; then
-            echo "Running Terraform Destroy For Production Environment"
+            terraform plan --var-file=Alpha.tfvars
+          elif [[ ${GITHUB_REF} == 'refs/heads/production' && ${{ env.ENV_DESTROY_PROD }} == 'NO' ]]; then
+            echo "Running Terraform Plan For Production Environment"
             terraform workspace select prod
-            terraform destroy --var-file=Bravo.tfvars --auto-approve
+            terraform plan --var-file=Bravo.tfvars
           else
             echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
           fi

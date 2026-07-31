@@ -1,0 +1,72 @@
+name: Terraform Destroy Reusable Workflow
+on:
+  workflow_call:
+    inputs:
+      ENV_DESTROY_DEV:
+        required: true
+        type: string
+      ENV_DESTROY_PROD:
+        required: true
+        type: string
+      TERRAFORM_DESTROY:
+        required: true
+        type: string
+defaults:
+  run:
+    shell: bash
+
+# Env vars don't inherit automatically. 
+#Pass them explicitly as inputs or via env mapping:
+  
+jobs:
+  reusable-workflow-job-terraform-plan:
+    runs-on: ubuntu-latest
+    env:
+      ENV_DESTROY_DEV: ${{ inputs.ENV_DESTROY_DEV }}
+      ENV_DESTROY_PROD: ${{ inputs.ENV_DESTROY_PROD }}
+      TERRAFORM_DESTROY: ${{ inputs.TERRAFORM_DESTROY }}
+    defaults:
+      run:
+        working-directory: ./Alpha-Bravo
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "arn:aws:iam::534344665033:role/awsb74-github-action-oidc-role"
+          role-session-name: github-action-oidc-role
+          aws-region: "us-east-1"
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+      - name: Print Branch Reference & Folder
+        run: echo The Current Branch Is $GITHUB_REF && pwd && ls -al
+      - name: Terraform Init, Format, Validate
+        run: |
+          terraform init
+          terraform fmt
+          terraform validate
+      - name: Creating Terraform Workspace
+        shell: bash
+        run: |
+          rm -rf .terraform && terraform init
+          terraform workspace select dev || terraform workspace new dev
+          terraform workspace select prod || terraform workspace new prod
+          terraform workspace list
+      - name: Terraform Destroy
+        run: |
+          if [[ ${GITHUB_REF} == 'refs/heads/development' && ${{ env.ENV_DESTROY_DEV }} == 'YES' ]]; then
+            echo "Running Terraform Destroy For Development Environment"
+            terraform workspace select dev
+            terraform destroy --var-file=Alpha.tfvars --auto-approve
+          elif [[ ${GITHUB_REF} == 'refs/heads/production' && ${{ env.ENV_DESTROY_PROD }} == 'YES' ]]; then
+            echo "Running Terraform Destroy For Production Environment"
+            terraform workspace select prod
+            terraform destroy --var-file=Bravo.tfvars --auto-approve
+          else
+            echo "Nothing Is Deployed As The Branch Is Not Dev or Prod."
+          fi
+
+# Reusable workflows allow you to reuse an entire workflow, including all its jobs and steps. This is useful when you have a complete CI/CD process that you want to use across multiple repositories. By creating a reusable workflow, you can maintain a single source of truth for your CI/CD process and promote best practices across your organization.

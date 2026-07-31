@@ -98,33 +98,33 @@ jobs: #Jobs List
     name: 'Using Plan Reusable Workflow' 
     uses: ./.github/workflows/ReusableJobWorkflowPlan.yml
     with:
-      ENV_DESTROY_DEV: NO
+      ENV_DESTROY_DEV: YES
       ENV_DESTROY_PROD: NO
-      TERRAFORM_DESTROY: NO
+      TERRAFORM_DESTROY: YES
     #uses: SreeVeerDevOps/GitHubActionsReusableJobsWorkflows/.github/workflows/ReusableJobWorkflowPlan.yml@main
     #Below will make the secrets available to the reusable job.
     secrets: inherit
 
-  # terraform-apply:
-  #   if: ${{ vars.TERRAFORM_DESTROY == 'NO' }}
-  #   needs: terraform-plan
-  #   name: 'Using Apply Reusable Workflow' 
-  #   uses: ./.github/workflows/ReusableJobWorkflowApply.yml
-  #   with:
-  #     ENV_DESTROY_DEV: YES
-  #     ENV_DESTROY_PROD: NO
-  #     TERRAFORM_DESTROY: YES
-  #   #uses: SreeVeerDevOps/GitHubActionsReusableJobsWorkflows/.github/workflows/ReusableJobWorkflowApply.yml@main
-  #   secrets: inherit
+  terraform-apply:
+    if: ${{ vars.TERRAFORM_DESTROY == 'NO' }}
+    needs: terraform-plan
+    name: 'Using Apply Reusable Workflow' 
+    uses: ./.github/workflows/ReusableJobWorkflowApply.yml
+    with:
+      ENV_DESTROY_DEV: YES
+      ENV_DESTROY_PROD: NO
+      TERRAFORM_DESTROY: YES
+    #uses: SreeVeerDevOps/GitHubActionsReusableJobsWorkflows/.github/workflows/ReusableJobWorkflowApply.yml@main
+    secrets: inherit
 
-  # terraform-destroy:
-  #   if: ${{ vars.TERRAFORM_DESTROY == 'YES' }}
-  #   name: 'Using Destroy Reusable Workflow' 
-  #   uses: ./.github/workflows/ReusableJobWorkflowDestroy.yml
-  #   with:
-  #     ENV_DESTROY_DEV: YES
-  #     ENV_DESTROY_PROD: NO
-  #     TERRAFORM_DESTROY: YES
-  #   #uses: SreeVeerDevOps/GitHubActionsReusableJobsWorkflows/.github/workflows/ReusableJobWorkflowDestroy.yml@main
-  #   #Below will make the secrets available to the reusable job.
-  #   secrets: inherit
+  terraform-destroy:
+    if: ${{ vars.TERRAFORM_DESTROY == 'YES' }}
+    name: 'Using Destroy Reusable Workflow' 
+    uses: ./.github/workflows/ReusableJobWorkflowDestroy.yml
+    with:
+      ENV_DESTROY_DEV: YES
+      ENV_DESTROY_PROD: NO
+      TERRAFORM_DESTROY: YES
+    #uses: SreeVeerDevOps/GitHubActionsReusableJobsWorkflows/.github/workflows/ReusableJobWorkflowDestroy.yml@main
+    #Below will make the secrets available to the reusable job.
+    secrets: inherit
