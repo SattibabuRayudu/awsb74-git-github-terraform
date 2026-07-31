@@ -58,7 +58,7 @@ jobs:
         with:
           directory: ./Alpha-Bravo
           quiet: true
-          soft_fail: true
+          soft_fail: false
           output_format: cli,json
           output_file_path: console,./Alpha-Bravo/results.json
       - name: Upload file to bucket
