@@ -58,7 +58,7 @@ jobs:
         with:
           directory: ./Alpha-Bravo
           quiet: true
-          soft_fail: fail #Proceed with the workflow even if checkov fails
+          soft_fail: true
           output_format: cli,json
           output_file_path: console,./Alpha-Bravo/results.json
       - name: Upload file to bucket
