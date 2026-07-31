@@ -69,15 +69,15 @@ jobs:
           S3_BUCKET: "rayudu-terraform-modules"
           #S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
           #S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-      - name: 'Stage_6 - Slack Notification'
-        uses: act10ns/slack@v2
-        if: always()  # Runs regardless of job outcome
-        with:
-          status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}  # Includes step details
-          channel: '#devsecopsb50'    # Optional: override default channel
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      # - name: 'Stage_6 - Slack Notification'
+      #   uses: act10ns/slack@v2
+      #   if: always()  # Runs regardless of job outcome
+      #   with:
+      #     status: ${{ job.status }}
+      #     steps: ${{ toJson(steps) }}  # Includes step details
+      #     channel: '#devsecopsb50'    # Optional: override default channel
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
   terraform-initiate:
     if: ${{ github.event.inputs.TERRAFORM == 'APPLY' || github.event.inputs.TERRAFORM == 'PLAN' || github.event.inputs.TERRAFORM == 'DESTROY' || github.event.inputs.TERRAFORM == 'DRIFT' }}
     name: 'Stage_2 - Terraform Initialization'
